@@ -9,3 +9,5 @@ build/
 .idea/
 uploads/
 .mongodb/
+backend/credentials.json
+backend/uploads/
