@@ -69,9 +69,7 @@ export default function DataVault() {
         sections.map((section) => ({
           ...section,
           fields: section.fields?.map((field) =>
-            field._id === fieldId
-              ? { ...field, fieldName, fieldValue }
-              : field,
+            field._id === fieldId ? { ...field, fieldName, fieldValue } : field,
           ),
         })),
       );
@@ -251,7 +249,9 @@ export default function DataVault() {
 
         {sections.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-gray-600">No vault sections found. Start by uploading a document.</p>
+            <p className="text-gray-600">
+              No vault sections found. Start by uploading a document.
+            </p>
           </div>
         ) : (
           <div className="space-y-4">

@@ -20,6 +20,11 @@ const vaultFieldSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    semanticTag: {
+      type: String,
+      default: null,
+      // Examples: PERSON_FULL_NAME, PERSON_FATHER_NAME, PERSON_DOB, etc.
+    },
     confidence: {
       type: Number,
       min: 0,

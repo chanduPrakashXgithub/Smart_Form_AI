@@ -30,9 +30,7 @@ export default function ConfirmationDialog({
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            {isDangerous && (
-              <AlertCircle className="w-6 h-6 text-red-600" />
-            )}
+            {isDangerous && <AlertCircle className="w-6 h-6 text-red-600" />}
             <h2 className="text-lg font-bold">{title}</h2>
           </div>
           <button

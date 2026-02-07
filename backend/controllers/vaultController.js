@@ -5,6 +5,7 @@ import {
 } from "../services/documentVaultService.js";
 import VaultField from "../models/VaultField.js";
 import VaultAmbiguity from "../models/VaultAmbiguity.js";
+import { classifyFieldSemantic } from "../services/formAIService.js";
 
 export const getVaultSections = async (req, res) => {
   try {
@@ -64,11 +65,15 @@ export const addFieldToSection = async (req, res) => {
 
     const section = await getOrCreateSection(userId, sectionType);
 
+    // Classify field semantically for intelligent mapping
+    const semanticTag = classifyFieldSemantic(fieldName);
+    
     const field = new VaultField({
       sectionId: section._id,
       userId,
       fieldName,
       fieldValue,
+      semanticTag,  // Add semantic tag for intelligent mapping
       confidence: 100,
       extractedFrom: "MANUAL",
       metadata: {

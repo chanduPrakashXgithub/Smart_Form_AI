@@ -191,3 +191,107 @@ export const ambiguityService = {
     return response.data;
   },
 };
+
+export const formService = {
+  generateFromImage: async (formImage: File) => {
+    const formData = new FormData();
+    formData.append("formImage", formImage);
+
+    const response = await axios.post(
+      `${API_URL}/api/forms/generate-from-image`,
+      formData,
+      {
+        headers: { ...getAuthHeaders(), "Content-Type": "multipart/form-data" },
+      },
+    );
+    return response.data;
+  },
+
+  generateFromText: async (pastedText: string) => {
+    const response = await axios.post(
+      `${API_URL}/api/forms/generate-from-text`,
+      { pastedText },
+      { headers: getAuthHeaders() },
+    );
+    return response.data;
+  },
+
+  getUserForms: async (status?: string) => {
+    const response = await axios.get(`${API_URL}/api/forms`, {
+      headers: getAuthHeaders(),
+      params: { status },
+    });
+    return response.data;
+  },
+
+  getFormById: async (formId: string) => {
+    const response = await axios.get(`${API_URL}/api/forms/${formId}`, {
+      headers: getAuthHeaders(),
+    });
+    return response.data;
+  },
+
+  updateForm: async (formId: string, updates: any) => {
+    const response = await axios.put(
+      `${API_URL}/api/forms/${formId}`,
+      updates,
+      { headers: getAuthHeaders() },
+    );
+    return response.data;
+  },
+
+  deleteForm: async (formId: string) => {
+    const response = await axios.delete(`${API_URL}/api/forms/${formId}`, {
+      headers: getAuthHeaders(),
+    });
+    return response.data;
+  },
+
+  submitForm: async (formId: string, submittedData: any, notes?: string) => {
+    const response = await axios.post(
+      `${API_URL}/api/forms/${formId}/submit`,
+      { submittedData, notes },
+      { headers: getAuthHeaders() },
+    );
+    return response.data;
+  },
+
+  getFormSubmissions: async (
+    formId: string,
+    startDate?: string,
+    endDate?: string,
+  ) => {
+    const response = await axios.get(
+      `${API_URL}/api/forms/${formId}/submissions`,
+      {
+        headers: getAuthHeaders(),
+        params: { startDate, endDate },
+      },
+    );
+    return response.data;
+  },
+
+  getAllSubmissions: async (
+    period?: string,
+    startDate?: string,
+    endDate?: string,
+  ) => {
+    const response = await axios.get(`${API_URL}/api/forms/submissions/all`, {
+      headers: getAuthHeaders(),
+      params: { period, startDate, endDate },
+    });
+    return response.data;
+  },
+
+  getFieldAlternatives: async (
+    fieldLabel: string,
+    vaultMappingKey?: string,
+  ) => {
+    const response = await axios.post(
+      `${API_URL}/api/forms/alternatives`,
+      { fieldLabel, vaultMappingKey },
+      { headers: getAuthHeaders() },
+    );
+    return response.data;
+  },
+};

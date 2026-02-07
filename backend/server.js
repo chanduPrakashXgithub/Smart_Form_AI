@@ -26,6 +26,7 @@ import documentRoutes from "./routes/documentRoutes.js";
 import vaultRoutes from "./routes/vaultRoutes.js";
 import autofillRoutes from "./routes/autofillRoutes.js";
 import ambiguityRoutes from "./routes/ambiguityRoutes.js";
+import formRoutes from "./routes/formRoutes.js";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -82,6 +83,7 @@ app.use("/api/documents", documentRoutes);
 app.use("/api/vault", vaultRoutes);
 app.use("/api/autofill", autofillRoutes);
 app.use("/api/ambiguities", ambiguityRoutes);
+app.use("/api/forms", formRoutes);
 
 // 404 handler
 app.use((req, res) => {

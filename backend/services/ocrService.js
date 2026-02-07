@@ -1,37 +1,56 @@
-import vision from "@google-cloud/vision";
+import Tesseract from "tesseract.js";
 
-const client = new vision.ImageAnnotatorClient({
-  keyFilename: process.env.GOOGLE_VISION_KEY_FILE,
-});
-
+/**
+ * Perform OCR on image file path
+ * @param {string} imagePath - Path to image file
+ * @returns {Promise<string>} - Extracted text
+ */
 export const performOCR = async (imagePath) => {
   try {
-    const request = {
-      image: { source: { imageUri: imagePath } },
-    };
-
-    const [result] = await client.documentTextDetection(request);
-    const fullTextAnnotation = result.fullTextAnnotation || {};
-    return fullTextAnnotation.text || "";
+    console.log("🔍 Performing OCR with Tesseract on:", imagePath);
+    
+    const { data: { text } } = await Tesseract.recognize(imagePath, "eng", {
+      logger: (m) => {
+        if (m.progress === 1) {
+          console.log(`✅ OCR Complete - ${m.status}`);
+        }
+      },
+    });
+    
+    return text || "";
   } catch (error) {
     console.error("OCR error:", error);
     throw new Error("Failed to perform OCR");
   }
 };
 
-export const extractTextFromImage = async (imageData) => {
+/**
+ * Extract text from image buffer (PNG normalized)
+ * @param {Buffer} imageBuffer - Buffer containing PNG image data
+ * @returns {Promise<string>} - Extracted text
+ */
+export const extractTextFromImage = async (imageBuffer) => {
   try {
-    const request = {
-      image: {
-        content: imageData, // base64 encoded image
-      },
-    };
+    console.log("🔍 Extracting text from image buffer...");
+    console.log("   Buffer size:", imageBuffer.length, "bytes");
+    
+    if (!imageBuffer || imageBuffer.length === 0) {
+      throw new Error("Image buffer is empty");
+    }
 
-    const [result] = await client.textDetection(request);
-    const textAnnotations = result.textAnnotations || [];
-    return textAnnotations.length > 0 ? textAnnotations[0].description : "";
+    const { data: { text } } = await Tesseract.recognize(imageBuffer, "eng", {
+      logger: (m) => {
+        if (m.progress === 1 || m.progress === 0) {
+          console.log(`   [${Math.round(m.progress * 100)}%] ${m.status}`);
+        }
+      },
+    });
+    
+    console.log("✅ Text extracted successfully");
+    console.log("   Extracted text length:", text.length, "characters");
+    return text || "";
   } catch (error) {
-    console.error("Text extraction error:", error);
-    throw new Error("Failed to extract text from image");
+    console.error("❌ Text extraction error:", error.message);
+    throw new Error("Failed to extract text from image: " + error.message);
   }
 };
