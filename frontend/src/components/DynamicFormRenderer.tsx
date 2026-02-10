@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
-import { ChevronDown } from "lucide-react";
+import { useState } from "react";
+import { ChevronDown, HelpCircle } from "lucide-react";
+import FieldGuidance from "./FieldGuidance";
 
 interface FormField {
   label: string;
@@ -30,9 +31,24 @@ export default function DynamicFormRenderer({
   onAlternativeRequest,
   errors = {},
 }: DynamicFormRendererProps) {
+  const [activeGuidanceField, setActiveGuidanceField] = useState<string | null>(null);
+  const [showGuidance, setShowGuidance] = useState(false);
+  const [guidanceFieldType, setGuidanceFieldType] = useState<string>('text');
+
   const sortedFields = [...fields].sort(
     (a, b) => (a.order || 0) - (b.order || 0),
   );
+
+  const handleShowGuidance = (fieldLabel: string, fieldType: string) => {
+    setActiveGuidanceField(fieldLabel);
+    setGuidanceFieldType(fieldType);
+    setShowGuidance(true);
+  };
+
+  const handleCloseGuidance = () => {
+    setShowGuidance(false);
+    setActiveGuidanceField(null);
+  };
 
   const renderField = (field: FormField) => {
     const value = formData[field.label] || "";
@@ -171,18 +187,31 @@ export default function DynamicFormRenderer({
 
     return (
       <div key={field.label} className="mb-6">
-        <label className="block text-sm font-bold text-slate-800 mb-2.5">
-          {field.label}
-          {field.required && <span className="text-red-500 ml-1.5 text-base">*</span>}
-          {field.vaultValue && (
-            <span className="ml-3 text-xs font-semibold text-green-700 bg-green-100 px-3 py-1.5 rounded-full inline-flex items-center gap-1.5 shadow-sm border border-green-200">
-              <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-              </svg>
-              Auto-filled
-            </span>
-          )}
-        </label>
+        <div className="flex items-center justify-between mb-2.5">
+          <label className="block text-sm font-bold text-slate-800">
+            {field.label}
+            {field.required && <span className="text-red-500 ml-1.5 text-base">*</span>}
+            {field.vaultValue && (
+              <span className="ml-3 text-xs font-semibold text-green-700 bg-green-100 px-3 py-1.5 rounded-full inline-flex items-center gap-1.5 shadow-sm border border-green-200">
+                <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                Auto-filled
+              </span>
+            )}
+          </label>
+          
+          {/* AI Guidance Button */}
+          <button
+            type="button"
+            onClick={() => handleShowGuidance(field.label, field.fieldType)}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-lg transition-all duration-200 border border-blue-200 hover:shadow-md group"
+            title="Get AI guidance for this field"
+          >
+            <HelpCircle className="w-4 h-4 group-hover:scale-110 transition-transform" />
+            <span className="hidden sm:inline">Help</span>
+          </button>
+        </div>
 
         {renderInput()}
 
@@ -221,8 +250,21 @@ export default function DynamicFormRenderer({
   };
 
   return (
-    <div className="space-y-5">
-      {sortedFields.map((field) => renderField(field))}
-    </div>
+    <>
+      <div className="space-y-5">
+        {sortedFields.map((field) => renderField(field))}
+      </div>
+      
+      {/* AI Field Guidance Panel */}
+      {activeGuidanceField && (
+        <FieldGuidance
+          fieldLabel={activeGuidanceField}
+          fieldType={guidanceFieldType}
+          show={showGuidance}
+          onClose={handleCloseGuidance}
+          filledFields={formData}
+        />
+      )}
+    </>
   );
 }

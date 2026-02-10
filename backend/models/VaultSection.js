@@ -17,6 +17,8 @@ const vaultSectionSchema = new mongoose.Schema(
         "EDUCATION_10TH",
         "EDUCATION_INTER",
         "EDUCATION_DEGREE",
+        "RESUME_SECTION",
+        "FORM_SUBMISSIONS",
       ],
       required: true,
     },
@@ -31,6 +33,7 @@ const vaultSectionSchema = new mongoose.Schema(
           EDUCATION_DEGREE: 70,
           EDUCATION_INTER: 70,
           EDUCATION_10TH: 70,
+          RESUME_SECTION: 80,
         };
         return authorityMap[this.sectionType] || 0;
       },

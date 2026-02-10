@@ -18,6 +18,7 @@ import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
+import path from "path";
 import connectDB from "./config/database.js";
 import { authMiddleware, errorHandler } from "./middleware/auth.js";
 
@@ -27,6 +28,7 @@ import vaultRoutes from "./routes/vaultRoutes.js";
 import autofillRoutes from "./routes/autofillRoutes.js";
 import ambiguityRoutes from "./routes/ambiguityRoutes.js";
 import formRoutes from "./routes/formRoutes.js";
+import statsRoutes from "./routes/statsRoutes.js";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -72,6 +74,9 @@ app.use(express.urlencoded({ limit: "50mb", extended: true }));
 // Database connection
 connectDB();
 
+// Serve static files from uploads directory
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 // Health check
 app.get("/health", (req, res) => {
   res.json({ status: "Server is running" });
@@ -84,6 +89,8 @@ app.use("/api/vault", vaultRoutes);
 app.use("/api/autofill", autofillRoutes);
 app.use("/api/ambiguities", ambiguityRoutes);
 app.use("/api/forms", formRoutes);
+app.use("/api/stats", statsRoutes);
+app.use("/api/stats", statsRoutes);
 
 // 404 handler
 app.use((req, res) => {

@@ -207,6 +207,21 @@ export const formService = {
     return response.data;
   },
 
+  // 🎯 Smart generation with UI noise filtering
+  smartGenerateFromImage: async (formImage: File) => {
+    const formData = new FormData();
+    formData.append("formImage", formImage);
+
+    const response = await axios.post(
+      `${API_URL}/api/forms/smart-generate-from-image`,
+      formData,
+      {
+        headers: { ...getAuthHeaders(), "Content-Type": "multipart/form-data" },
+      },
+    );
+    return response.data;
+  },
+
   generateFromText: async (pastedText: string) => {
     const response = await axios.post(
       `${API_URL}/api/forms/generate-from-text`,
@@ -248,10 +263,30 @@ export const formService = {
   },
 
   submitForm: async (formId: string, submittedData: any, notes?: string) => {
+    const formData = new FormData();
+    
+    const plainData: Record<string, any> = {};
+    
+    Object.entries(submittedData).forEach(([key, value]) => {
+      if (value instanceof File) {
+        formData.append(key, value);
+      } else {
+        plainData[key] = value;
+      }
+    });
+    
+    formData.append("submittedData", JSON.stringify(plainData));
+    if (notes) formData.append("notes", notes);
+    
     const response = await axios.post(
       `${API_URL}/api/forms/${formId}/submit`,
-      { submittedData, notes },
-      { headers: getAuthHeaders() },
+      formData,
+      { 
+        headers: {
+          ...getAuthHeaders(),
+          "Content-Type": "multipart/form-data",
+        },
+      },
     );
     return response.data;
   },
@@ -283,6 +318,49 @@ export const formService = {
     return response.data;
   },
 
+  deleteSubmission: async (submissionId: string) => {
+    const response = await axios.delete(
+      `${API_URL}/api/forms/submissions/${submissionId}`,
+      { headers: getAuthHeaders() },
+    );
+    return response.data;
+  },
+
+  updateSubmission: async (
+    submissionId: string,
+    submittedData: any,
+    notes?: string,
+    status?: string,
+  ) => {
+    const formData = new FormData();
+
+    const plainData: Record<string, any> = {};
+
+    Object.entries(submittedData).forEach(([key, value]) => {
+      if (value instanceof File) {
+        formData.append(key, value);
+      } else {
+        plainData[key] = value;
+      }
+    });
+
+    formData.append("submittedData", JSON.stringify(plainData));
+    if (notes) formData.append("notes", notes);
+    if (status) formData.append("status", status);
+
+    const response = await axios.put(
+      `${API_URL}/api/forms/submissions/${submissionId}`,
+      formData,
+      {
+        headers: {
+          ...getAuthHeaders(),
+          "Content-Type": "multipart/form-data",
+        },
+      },
+    );
+    return response.data;
+  },
+
   getFieldAlternatives: async (
     fieldLabel: string,
     vaultMappingKey?: string,
@@ -292,6 +370,38 @@ export const formService = {
       { fieldLabel, vaultMappingKey },
       { headers: getAuthHeaders() },
     );
+    return response.data;
+  },
+
+  // 🤖 AI Guidance methods
+  getFieldGuidance: async (
+    fieldLabel: string,
+    fieldType?: string,
+    filledFields?: Record<string, any>
+  ) => {
+    const response = await axios.post(
+      `${API_URL}/api/forms/field-guidance`,
+      { fieldLabel, fieldType, filledFields },
+      { headers: getAuthHeaders() },
+    );
+    return response.data;
+  },
+
+  getBatchGuidance: async (fields: Array<{ label: string; type: string }>) => {
+    const response = await axios.post(
+      `${API_URL}/api/forms/batch-guidance`,
+      { fields },
+      { headers: getAuthHeaders() },
+    );
+    return response.data;
+  },
+};
+
+export const statsService = {
+  getQuickStats: async () => {
+    const response = await axios.get(`${API_URL}/api/stats/quick`, {
+      headers: getAuthHeaders(),
+    });
     return response.data;
   },
 };

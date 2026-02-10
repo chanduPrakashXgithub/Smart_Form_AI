@@ -10,6 +10,7 @@ export default function FormBuilder() {
   const [activeTab, setActiveTab] = useState<"image" | "text">("image");
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [useSmartDetection, setUseSmartDetection] = useState(true);
 
   // Image upload state
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
@@ -83,9 +84,23 @@ export default function FormBuilder() {
 
     try {
       setLoading(true);
-      const result = await formService.generateFromImage(selectedImage);
+      
+      // Use smart detection if enabled
+      const result = useSmartDetection 
+        ? await formService.smartGenerateFromImage(selectedImage)
+        : await formService.generateFromImage(selectedImage);
 
       setGeneratedForm(result.form);
+
+      // Show detection stats for smart mode
+      if (useSmartDetection && result.detectionStats) {
+        toast.success(
+          `Form generated! ${result.detectionStats.validFields} fields detected (filtered out ${result.detectionStats.filteredOut} UI elements)`,
+          { duration: 4000 }
+        );
+      } else {
+        toast.success("Form generated successfully!");
+      }
 
       // Auto-fill form data with vault values
       const initialData: { [key: string]: any } = {};
@@ -95,8 +110,6 @@ export default function FormBuilder() {
         }
       });
       setFormData(initialData);
-
-      toast.success("Form generated successfully!");
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Failed to generate form");
     } finally {
@@ -332,6 +345,32 @@ export default function FormBuilder() {
                     </div>
                   </div>
                 )}
+
+                {/* Smart Detection Toggle */}
+                <div className="flex items-center justify-between p-4 bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl border border-purple-200">
+                  <div className="flex items-center gap-3">
+                    <Sparkles className="w-5 h-5 text-purple-600" />
+                    <div>
+                      <h4 className="text-sm font-semibold text-slate-800">Smart Field Detection</h4>
+                      <p className="text-xs text-slate-600 mt-0.5">
+                        Filters UI noise like "Submit", "Choose File", etc.
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setUseSmartDetection(!useSmartDetection)}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                      useSmartDetection ? 'bg-purple-600' : 'bg-gray-300'
+                    }`}
+                  >
+                    <span
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                        useSmartDetection ? 'translate-x-6' : 'translate-x-1'
+                      }`}
+                    />
+                  </button>
+                </div>
 
                 <button
                   onClick={handleGenerateFromImage}

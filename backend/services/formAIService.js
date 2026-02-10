@@ -1,7 +1,29 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { extractTextFromImage } from "./ocrService.js";
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+// Lazy initialization - initialize only when needed
+let genAI, isInitialized = false;
+
+function initializeGemini() {
+  if (isInitialized) return true;
+  
+  const apiKey = process.env.GEMINI_API_KEY;
+  
+  if (!apiKey || apiKey === "your_api_key_here") {
+    console.warn("⚠️ GEMINI_API_KEY not configured - form AI features will use OCR fallback");
+    return false;
+  }
+  
+  console.log("✅ Initializing Gemini AI for form processing");
+  genAI = new GoogleGenerativeAI(apiKey);
+  isInitialized = true;
+  return true;
+}
+
+// Helper to check if Gemini is available
+function isGeminiAvailable() {
+  return initializeGemini();
+}
 
 /**
  * Placeholder detection patterns - blocks placeholder/helper text
@@ -614,9 +636,9 @@ const cleanFormStructure = (structure) => {
  */
 const analyzeFormStructure = async (text) => {
   try {
-    // Try Gemini AI first
-    if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY === 'your_key_here') {
-      console.log("⏮️ No valid Gemini API key, using fallback parser...");
+    // Check if Gemini is available
+    if (!isGeminiAvailable()) {
+      console.log("⏮️ Gemini not available, using fallback parser...");
       return parseFormStructureWithoutAI(text);
     }
     
@@ -769,6 +791,12 @@ Return ONLY the JSON object, no explanation.`;
  * Generate vault mapping suggestions for form fields
  */
 export const suggestVaultMappings = async (fields, vaultFields) => {
+    // Check if Gemini is available
+    if (!isGeminiAvailable()) {
+      console.log("⚠️ Gemini not available for vault mapping suggestions");
+      return [];
+    }
+  
   const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
   const prompt = `Match form fields with vault data fields. Return ONLY a valid JSON array.

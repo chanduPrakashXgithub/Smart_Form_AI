@@ -17,6 +17,12 @@ const formSubmissionSchema = new mongoose.Schema(
       of: mongoose.Schema.Types.Mixed,
       required: true,
     },
+    submittedDataList: [
+      {
+        label: String,
+        value: mongoose.Schema.Types.Mixed,
+      },
+    ],
     submittedAt: {
       type: Date,
       default: Date.now,

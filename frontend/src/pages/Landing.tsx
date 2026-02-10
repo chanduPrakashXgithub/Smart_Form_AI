@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
   Sparkles, 
@@ -16,6 +16,7 @@ import {
   TrendingUp,
   Clock
 } from "lucide-react";
+import "../styles/animations.css";
 
 export default function Landing() {
   const navigate = useNavigate();
@@ -23,6 +24,18 @@ export default function Landing() {
   const [showVideoModal, setShowVideoModal] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeFeature, setActiveFeature] = useState(0);
+  
+  // Refs for intersection observer
+  const statsRef = useRef<HTMLElement>(null);
+  const featuresRef = useRef<HTMLElement>(null);
+  const howItWorksRef = useRef<HTMLElement>(null);
+  const ctaRef = useRef<HTMLElement>(null);
+  
+  // Visibility states
+  const [statsVisible, setStatsVisible] = useState(false);
+  const [featuresVisible, setFeaturesVisible] = useState(false);
+  const [howItWorksVisible, setHowItWorksVisible] = useState(false);
+  const [ctaVisible, setCtaVisible] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY);
@@ -35,6 +48,32 @@ export default function Landing() {
       setActiveFeature((prev) => (prev + 1) % 3);
     }, 3000);
     return () => clearInterval(interval);
+  }, []);
+
+  // Intersection Observer for lazy loading sections
+  useEffect(() => {
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -100px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          if (entry.target === statsRef.current) setStatsVisible(true);
+          if (entry.target === featuresRef.current) setFeaturesVisible(true);
+          if (entry.target === howItWorksRef.current) setHowItWorksVisible(true);
+          if (entry.target === ctaRef.current) setCtaVisible(true);
+        }
+      });
+    }, observerOptions);
+
+    if (statsRef.current) observer.observe(statsRef.current);
+    if (featuresRef.current) observer.observe(featuresRef.current);
+    if (howItWorksRef.current) observer.observe(howItWorksRef.current);
+    if (ctaRef.current) observer.observe(ctaRef.current);
+
+    return () => observer.disconnect();
   }, []);
 
   const features = [
@@ -225,16 +264,16 @@ export default function Landing() {
       </section>
 
       {/* Stats Section */}
-      <section className="py-20 bg-gradient-to-br from-blue-600 to-purple-600">
+      <section ref={statsRef} className="py-20 bg-gradient-to-br from-blue-600 to-purple-600">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
             {stats.map((stat, idx) => (
               <div 
                 key={idx}
-                className="text-center animate-fade-in-up"
-                style={{ animationDelay: `${idx * 0.1}s` }}
+                className={`text-center transition-all duration-700 ${statsVisible ? 'fade-in-up' : 'opacity-0 translate-y-10'}`}
+                style={{ animationDelay: statsVisible ? `${idx * 100}ms` : '0ms' }}
               >
-                <div className="inline-flex items-center justify-center w-12 h-12 bg-white/20 rounded-xl mb-4">
+                <div className="inline-flex items-center justify-center w-12 h-12 bg-white/20 rounded-xl mb-4 text-white">
                   {stat.icon}
                 </div>
                 <div className="text-4xl font-bold text-white mb-2">{stat.value}</div>
@@ -246,9 +285,9 @@ export default function Landing() {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-20 bg-white">
+      <section ref={featuresRef} id="features" className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
+          <div className={`text-center mb-16 transition-all duration-700 ${featuresVisible ? 'fade-in-up' : 'opacity-0 translate-y-10'}`}>
             <h2 className="text-4xl sm:text-5xl font-bold text-slate-800 mb-4">
               Powerful Features
             </h2>
@@ -261,7 +300,8 @@ export default function Landing() {
             {features.map((feature, idx) => (
               <div
                 key={idx}
-                className="group relative bg-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border border-slate-100 cursor-pointer"
+                className={`group relative bg-white rounded-2xl p-6 shadow-sm hover:shadow-lg transition-all duration-500 hover:-translate-y-2 border border-slate-100 cursor-pointer ${featuresVisible ? 'fade-in-up' : 'opacity-0 translate-y-10'}`}
+                style={{ animationDelay: featuresVisible ? `${idx * 100}ms` : '0ms' }}
                 onMouseEnter={() => setActiveFeature(idx)}
               >
                 <div className={`absolute inset-0 bg-gradient-to-br ${feature.color} opacity-0 group-hover:opacity-5 rounded-2xl transition-opacity`}></div>
@@ -277,9 +317,9 @@ export default function Landing() {
       </section>
 
       {/* How It Works Section */}
-      <section id="how-it-works" className="py-20 bg-gradient-to-br from-slate-50 to-slate-100">
+      <section ref={howItWorksRef} id="how-it-works" className="py-20 bg-gradient-to-br from-slate-50 to-slate-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
+          <div className={`text-center mb-16 transition-all duration-700 ${howItWorksVisible ? 'fade-in-up' : 'opacity-0 translate-y-10'}`}>
             <h2 className="text-4xl sm:text-5xl font-bold text-slate-800 mb-4">
               How It Works
             </h2>
@@ -290,11 +330,11 @@ export default function Landing() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {howItWorks.map((item, idx) => (
-              <div key={idx} className="relative">
+              <div key={idx} className={`relative transition-all duration-700 ${howItWorksVisible ? 'fade-in-up' : 'opacity-0 translate-y-10'}`} style={{ animationDelay: howItWorksVisible ? `${idx * 150}ms` : '0ms' }}>
                 {idx < howItWorks.length - 1 && (
                   <div className="hidden lg:block absolute top-12 left-full w-full h-0.5 bg-gradient-to-r from-blue-600 to-purple-600"></div>
                 )}
-                <div className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all">
+                <div className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-all">
                   <div className="w-14 h-14 bg-gradient-to-br from-blue-600 to-purple-600 rounded-full flex items-center justify-center text-white text-2xl font-bold mb-4">
                     {item.step}
                   </div>
@@ -308,9 +348,9 @@ export default function Landing() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 relative overflow-hidden">
+      <section ref={ctaRef} className="py-20 bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 relative overflow-hidden">
         <div className="absolute inset-0 bg-grid-white/10"></div>
-        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <div className={`relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center transition-all duration-700 ${ctaVisible ? 'fade-in-up' : 'opacity-0 translate-y-10'}`}>
           <h2 className="text-4xl sm:text-5xl font-bold text-white mb-6">
             Ready to Save 10+ Hours Every Week?
           </h2>
@@ -319,7 +359,7 @@ export default function Landing() {
           </p>
           <button
             onClick={() => navigate("/auth")}
-            className="px-8 py-4 bg-white text-blue-600 rounded-xl font-bold text-lg shadow-2xl hover:shadow-3xl hover:scale-105 transition-all"
+            className="px-8 py-4 bg-white text-blue-600 rounded-xl font-bold text-lg shadow-xl hover:shadow-2xl hover:scale-105 transition-all"
           >
             Start Free Trial - No Credit Card Required
           </button>

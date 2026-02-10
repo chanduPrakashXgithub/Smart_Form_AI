@@ -59,7 +59,7 @@ const formSchema = new mongoose.Schema(
     fields: [formFieldSchema],
     sourceType: {
       type: String,
-      enum: ["IMAGE", "TEXT", "MANUAL"],
+      enum: ["IMAGE", "IMAGE_SMART", "TEXT", "MANUAL"],
       required: true,
     },
     sourceImage: String, // Path to original image if from image

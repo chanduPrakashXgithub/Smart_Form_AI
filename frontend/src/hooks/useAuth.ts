@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 interface User {
@@ -8,6 +9,7 @@ interface User {
 }
 
 export function useAuth() {
+  const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -79,6 +81,7 @@ export function useAuth() {
     localStorage.removeItem("authToken");
     setUser(null);
     setIsAuthenticated(false);
+    navigate("/", { replace: true });
   };
 
   return { user, loading, isAuthenticated, login, register, logout };
