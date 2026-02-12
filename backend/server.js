@@ -40,14 +40,12 @@ const corsOptions = {
     // Allow requests with no origin (like mobile apps or Postman)
     if (!origin) return callback(null, true);
 
-    // In development, allow all localhost origins
-    if (process.env.NODE_ENV === "development") {
-      if (origin.includes("localhost") || origin.includes("127.0.0.1")) {
-        return callback(null, true);
-      }
+    // Always allow localhost origins (for local development against deployed backend)
+    if (origin.includes("localhost") || origin.includes("127.0.0.1")) {
+      return callback(null, true);
     }
 
-    // In production, check against FRONTEND_URL
+    // Check against FRONTEND_URL
     if (process.env.FRONTEND_URL && origin === process.env.FRONTEND_URL) {
       return callback(null, true);
     }
