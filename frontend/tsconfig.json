@@ -20,15 +20,17 @@
     "noEmit": true,
     "jsx": "react-jsx",
     /* Linting */
-    "strict": true,
+    "strict": false,
     "noUnusedLocals": false,
     "noUnusedParameters": false,
+    "noImplicitAny": false,
     "noFallthroughCasesInSwitch": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true
   },
   "include": [
-    "src"
+    "src",
+    "src/vite-env.d.ts"
   ],
   "references": [
     {

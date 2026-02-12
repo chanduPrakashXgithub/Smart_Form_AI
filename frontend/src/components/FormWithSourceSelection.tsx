@@ -87,7 +87,7 @@ export default function FormWithSourceSelection({
       console.error('❌ Auto-fill error:', err);
       setError(
         err.response?.data?.error ||
-          'Failed to auto-fill form. Please try again.'
+        'Failed to auto-fill form. Please try again.'
       );
     } finally {
       setLoading(false);
@@ -141,7 +141,7 @@ export default function FormWithSourceSelection({
 
     // Compile form data with selected values
     const formData: Record<string, string> = {};
-    selectedVariants.forEach((fieldData, fieldName) => {
+    Object.entries(selectedVariants).forEach(([fieldName, fieldData]) => {
       formData[fieldName] = fieldData.value;
     });
 
