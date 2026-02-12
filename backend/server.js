@@ -45,6 +45,11 @@ const corsOptions = {
       return callback(null, true);
     }
 
+    // Allow Vercel preview/production domains
+    if (origin.includes("vercel.app")) {
+      return callback(null, true);
+    }
+
     // Check against FRONTEND_URL
     if (process.env.FRONTEND_URL && origin === process.env.FRONTEND_URL) {
       return callback(null, true);
